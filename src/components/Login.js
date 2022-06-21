@@ -27,6 +27,7 @@ const Login = () => {
     initialValues: {
       email: "",
       password: "",
+      project_name:""
     },
     validate: (data) => {
       let errors = {};
@@ -41,18 +42,22 @@ const Login = () => {
       if (!data.password) {
         errors.password = "Password is required.";
       }
+      if(!data.project_name){
+        errors.project_name = "Please select project";
+      }
       return errors;
     },
     onSubmit: (data) => {
       console.log(data);
 
+      delete data.project_name
       // Api call for login
       Api.post(login, data).then((res) => {
         console.log(res, "this is response");
         const response = res;
         if (response.status == 200) {
           dispatch(signIn());
-          dispatch(userData({ useremail: response.data.data.email }));
+          dispatch(userData({ useremail: response.data.data.email, project_name: selectedMilestone1 }));
           navigate("/dashboard");
         }
 
@@ -178,7 +183,9 @@ const Login = () => {
                 name="project_name"
                 value={selectedMilestone1}
                 options={projectList}
-                onChange={onMilestoneChange}
+                // onChange={onMilestoneChange}
+                onChange={(e) => { formik.setFieldValue([e.target.name],e.target.value.project_id); setSelectedMilestone1(e.target.value)}}
+                
                 variant="outlined info"
                 optionLabel="project_name"
                 placeholder="Select Project"

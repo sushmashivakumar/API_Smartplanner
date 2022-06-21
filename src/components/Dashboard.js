@@ -69,9 +69,9 @@ const Dashboard = () => {
   ];
 
   const exports = [
-    { name: '' },
-    { name: 'Export to XLS' },
-    { name: 'Export to XLS with Prognos template' },
+    { name: '', id: 1 },
+    { name: 'Export to XLS', id: 2 },
+    { name: 'Export to XLS with Prognos template', id: 3  },
 
   ];
 
@@ -235,6 +235,14 @@ const submitpmo = (data) => {
       setProductDialog(true);
   }
 
+
+  const exportExcel = () => {
+    console.log('export button clicked')
+     // setGetgetTableData(emptyProduct);
+     // setSubmitted(false);
+    //  setProductDialog(true);
+ }
+
   useEffect(() => {
     let url = '';
 
@@ -289,7 +297,7 @@ const rightToolbarTemplate = () => {
               style={{ color: "grey", border: "1px solid", borderRadius: "2rem", fontWeight: "700" }}
               value={selectedCity1}
               options={exports}
-              // onClick={exportExcel}
+              onClick={exportExcel}
               // onChange={onCityChange}
               optionLabel="name"
               icon="pi pi-upload"
