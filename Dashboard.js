@@ -29,7 +29,7 @@ const Dashboard = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [productDialog, setProductDialog] = useState(false);
   const [columnEdit, setColumnEdit] = useState(false);
-  // const [getDate, setGetDate] = useState([]);
+  const [getDate, setGetDate] = useState([]);
   const [selectedCity1, setSelectedCity1] = useState(null);
   const [getTableData, setGetTableData] = useState([]);
 
@@ -38,7 +38,6 @@ const Dashboard = () => {
   const [selectedMode, setSelectedMode] = useState(null);
   const [showMessage, setShowMessage] = useState(false);
   const modes = [
-    { name: "All" },
     { name: "Low Modify" },
     { name: "Medium Modify" },
     { name: "Heavy Modify" },
@@ -101,7 +100,7 @@ const Dashboard = () => {
     switch (activeIndex) {
       case 0:
         componentRender = (
-          <PMO columns={PMOColumns} data={PMOData} colEdit={columnEdit} handleTableData={submitpmo} />
+          <PMO columns={PMOColumns} data={getDate} colEdit={columnEdit} handleTableData={submitpmo} />
         );
         break;
 
@@ -205,39 +204,20 @@ const Dashboard = () => {
 
 
   // GET API for milestone date
+  const milestoneData = () => {
+    Api.get("/get_milestone_date")
+    .then((res) => {
+      console.log(res, "this is date")
+      setGetDate(res.data.data);
+    })
+    .catch((error) => {
+      setError(error);
+    });
+  }
 
-  // useEffect(() => {
-  //   // Temporary
-  //   // const getPMO = [
-  //   //   {
-  //   //     alpha: "10/4/2020",
-  //   //     ao: "10/2/2021",
-  //   //     beta: "10/5/2021",
-  //   //     bo: "5/3/2021",
-  //   //     es: "20/1/2021",
-  //   //     milestone_id: 1,
-  //   //     mode: "High",
-  //   //     po: "16/1/2021",
-  //   //     popl_2: "3/11/2020",
-  //   //     popl_3: "10/12/2020",
-  //   //     project_id: 2,
-  //   //     prq: "3/6/2021",
-  //   //     pv: "15/7/2021",
-  //   //   },
-  //   // ];
-  //   // setGetDate(getPMO);
-  //   //Temporary End
-
-  //   Api.get("/get_milestone_date")
-  //     .then((res) => {
-  //       console.log(res, "this is date")
-  //       setGetDate(res.data.data);
-  //     })
-  //     .catch((error) => {
-  //       setError(error);
-  //     });
-  //   // setProjectList(projects);
-  // }, []);
+  useEffect(() => {
+    milestoneData();
+  }, []);
 
   // GET API for Dev, Hor and Validation
 

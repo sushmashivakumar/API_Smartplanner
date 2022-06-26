@@ -14,7 +14,7 @@ function PMO({ columns, data, colEdit, handleTableData }) {
   const [milestoneEdit, setMilestoneEdit] = useState(false);
   const [milestoneDate, setMilestoneDate] = useState({});
   const [date3, setDate3] = useState(null);
-  const [getDate, setGetDate] = useState([]);
+  // const [getDate, setGetDate] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -101,45 +101,45 @@ function PMO({ columns, data, colEdit, handleTableData }) {
     );
   };
 
-  useEffect(() => {
-    // Temporary
-    // const getPMO = [
-    //   {
-    //     alpha: "10/4/2020",
-    //     ao: "10/2/2021",
-    //     beta: "10/5/2021",
-    //     bo: "5/3/2021",
-    //     es: "20/1/2021",
-    //     milestone_id: 1,
-    //     mode: "High",
-    //     po: "16/1/2021",
-    //     popl_2: "3/11/2020",
-    //     popl_3: "10/12/2020",
-    //     project_id: 2,
-    //     prq: "3/6/2021",
-    //     pv: "15/7/2021",
-    //   },
-    // ];
-    // setGetDate(getPMO);
-    //Temporary End
+  // useEffect(() => {
+  //   // Temporary
+  //   // const getPMO = [
+  //   //   {
+  //   //     alpha: "10/4/2020",
+  //   //     ao: "10/2/2021",
+  //   //     beta: "10/5/2021",
+  //   //     bo: "5/3/2021",
+  //   //     es: "20/1/2021",
+  //   //     milestone_id: 1,
+  //   //     mode: "High",
+  //   //     po: "16/1/2021",
+  //   //     popl_2: "3/11/2020",
+  //   //     popl_3: "10/12/2020",
+  //   //     project_id: 2,
+  //   //     prq: "3/6/2021",
+  //   //     pv: "15/7/2021",
+  //   //   },
+  //   // ];
+  //   // setGetDate(getPMO);
+  //   //Temporary End
 
-    Api.get("/get_milestone_date")
-      .then((res) => {
-        console.log(res, "this is date")
-        setGetDate(res.data.data);
-      })
-      .catch((error) => {
-        setError(error);
-      });
-    // setProjectList(projects);
-  }, []);
+  //   Api.get("/get_milestone_date")
+  //     .then((res) => {
+  //       console.log(res, "this is date")
+  //       setGetDate(res.data.data);
+  //     })
+  //     .catch((error) => {
+  //       setError(error);
+  //     });
+  //   // setProjectList(projects);
+  // }, []);
 
   return (
     <div>
 
       <div className="card">
         <DataTable
-          value={getDate}
+          value={data}
           //   editMode="cell"
           className="datatable-editing-demo"
           style={{ border: "1px solid grey" }}
