@@ -14,7 +14,7 @@ function PMO({ columns, data, colEdit, handleTableData }) {
   const [milestoneEdit, setMilestoneEdit] = useState(false);
   const [milestoneDate, setMilestoneDate] = useState({});
   const [date3, setDate3] = useState(null);
-  // const [getDate, setGetDate] = useState([]);
+  const [getDate, setGetDate] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -101,7 +101,7 @@ function PMO({ columns, data, colEdit, handleTableData }) {
     );
   };
 
-  // useEffect(() => {
+  useEffect(() => {
   //   // Temporary
   //   // const getPMO = [
   //   //   {
@@ -123,16 +123,16 @@ function PMO({ columns, data, colEdit, handleTableData }) {
   //   // setGetDate(getPMO);
   //   //Temporary End
 
-  //   Api.get("/get_milestone_date")
-  //     .then((res) => {
-  //       console.log(res, "this is date")
-  //       setGetDate(res.data.data);
-  //     })
-  //     .catch((error) => {
-  //       setError(error);
-  //     });
-  //   // setProjectList(projects);
-  // }, []);
+    Api.get("/get_milestone_date")
+      .then((res) => {
+        console.log(res, "this is date")
+        setGetDate(res.data.data);
+      })
+      .catch((error) => {
+        setError(error);
+      });
+    // setProjectList(projects);
+  }, []);
 
   return (
     <div>

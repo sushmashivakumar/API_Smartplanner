@@ -5,10 +5,13 @@ import { Dropdown } from "primereact/dropdown";
 import { Menubar } from "primereact/menubar";
 import TableInfo from "./TableInfo";
 import PMO from "./pmo";
+import Prognos from "./Prognos";
 import { TabMenu } from "primereact/tabmenu";
 import Mode from "./Mode";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { FileUpload } from 'primereact/fileupload';
+import axios from 'axios';
 import {
   Data,
   SummaryColumns,
@@ -22,28 +25,28 @@ import { Row } from "primereact/row";
 import { Column } from "primereact/column";
 import Api from "../service/Api";
 import { Toolbar } from "primereact/toolbar";
+import { baseUrl } from "../service/Config";
 
 const Dashboard = () => {
+  
   const toast = useRef(null);
   const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState(0);
   const [productDialog, setProductDialog] = useState(false);
   const [columnEdit, setColumnEdit] = useState(false);
-  const [getDate, setGetDate] = useState([]);
   const [selectedCity1, setSelectedCity1] = useState(null);
-  const [getTableData, setGetTableData] = useState([]);
-
+  const [getTableData, setGetgetTableData] = useState([]);
   const userStore = useSelector((state) => state.userInfo);
   const [error, setError] = useState("");
   const [selectedMode, setSelectedMode] = useState(null);
   const [showMessage, setShowMessage] = useState(false);
+  const [getDate, setGetDate] = useState([]);
+  const [budgetData, setbudgetData] = useState([]);
   const modes = [
     { name: "Low Modify" },
     { name: "Medium Modify" },
     { name: "Heavy Modify" },
   ];
-
-
 
   const tableInfo = useSelector((state) => state.tableInfo);
   const dispatch = useDispatch();
@@ -53,18 +56,13 @@ const Dashboard = () => {
     { label: "Validation", icon: "pi pi-fw pi-check-circle" },
     { label: "Horizontal", icon: "pi pi-fw pi-arrows-h" },
     { label: "Budget", icon: "pi pi-fw pi-briefcase" },
-
   ];
 
   const exports = [
     { name: "" },
-    { name: "Export to XLS" },
-    { name: "Export to XLS with Prognos template" },
+    { name: "Export to XLS", value: "xls" },
+    { name: "Export to XLS with Prognos template", value: "xlspro" },
   ];
-
-  // const UserInfo = () => {
-  //   return <div> Welcome, Sushma</div>;
-  // };
 
   const columns = [
     { field: "function_owner", header: "Function Owner" },
@@ -92,21 +90,30 @@ const Dashboard = () => {
   ];
 
   const handlePMOData = (data) => {
-    console.log('submit', data)
-  }
+    console.log("submit", data);
+  };
 
   const CustomComponent = () => {
     let componentRender = "";
     switch (activeIndex) {
       case 0:
         componentRender = (
-          <PMO columns={PMOColumns} data={getDate} colEdit={columnEdit} handleTableData={submitpmo} />
+          <PMO
+            columns={PMOColumns}
+            data={getDate}
+            colEdit={columnEdit}
+            handleTableData={submitpmo}
+          />
         );
         break;
-
       case 4:
         componentRender = (
-          <TableInfo columns={SummaryColumns} data={SummaryData} />
+          <TableInfo
+            columns={SummaryColumns}
+            data={budgetData}
+            // data={SummaryData}
+            handleTableData={submitpmo}
+          />
         );
         break;
       default:
@@ -114,6 +121,122 @@ const Dashboard = () => {
     }
     return componentRender;
   };
+
+  const handleTableData = (data) => {
+    const newTableInfo = tableInfo.map((table, index) => {
+      if (index === data.rowIndex) {
+        return { ...table, ...data.newRowData };
+      }
+      return table;
+    });
+    dispatch(loadData(newTableInfo));
+  };
+
+  const handleColumnEdit = () => {
+    setColumnEdit(true);
+  };
+
+  const handleCancelEdit = () => {
+    setColumnEdit(false);
+  };
+  const onModeChange = (e) => {
+    console.log(e, "this is mode");
+    setSelectedMode(e.value);
+    console.log("userStore", userStore);
+    const data = {
+      project_id: userStore.project_name.project_id,
+      mode: e.value.name,
+    };
+    Api.post("/filter_milestone", data).then((res) => {
+      console.log(res, "this is response");
+      const response = res;
+      if (response.status == 200) {
+        // Handle Response
+      }
+    });
+ 
+  };
+
+  const onFunctionChange = (e) => {
+    console.log(e, "this is tab change");
+    
+    const data = {
+      project_id: userStore.project_name.project_id,
+      mode: e.value.name,
+      function: data.data.function
+    };
+  
+    Api.post("/filter_records", data).then((res) => {
+      console.log(data, "this is records response");
+      const response = res;
+      if (response.status == 200) {
+        // Handle Response
+      }
+    });
+ 
+  };
+
+  const submitpmo = (data) => {
+    console.log(data, "this is post submit");
+
+    let url = "";
+    // Api call for submit
+    if (activeIndex === 0) {
+      url = "/insert_update_milestone_date"; // change url
+    }
+    if (activeIndex === 1) {
+      url = "/insert_update_records"; // change url
+    }
+    if (activeIndex === 2) {
+      url = "/insert_update_records"; // change url
+    }
+    if (activeIndex === 3) {
+      url = "/insert_update_records"; // change url
+    }
+    if(activeIndex !== 0 && activeIndex !==4){
+      // if(selectedMode !== ""){
+        Api.post(url, {data:[data]}).then((res) => {
+          console.log(res, "this is response");
+          const response = res;
+          if (response.status == 200) {
+            // Handle Response
+            // Updating data after success in API
+            if (activeIndex === 0) {
+              milestoneData();
+              
+            }
+            if (activeIndex !== 0) {
+              getApiData();
+            }
+          }
+        });
+      // }
+
+   
+     
+
+    }
+    // console.log({data:[data]}, "this is js data response");
+   
+  };
+
+  const milestoneData = () => {
+  
+    Api.get("/get_milestone_date")
+    .then((res) => {
+      console.log(res, "this is date")
+      setGetDate(res.data.data);
+    })
+    .catch((error) => {
+      setError(error);
+    });
+  };
+
+  useEffect(() => {
+    milestoneData();
+  }, []);
+
+ 
 
   let headerGroup = (
     <ColumnGroup>
@@ -138,90 +261,15 @@ const Dashboard = () => {
       </Row>
     </ColumnGroup>
   );
+
   const openNew = () => {
     console.log("button clicked");
-    setProductDialog(true);
+    // setGetgetTableData(emptyProduct);
+    // setSubmitted(false);
+   
   };
 
-  const handleTableData = (data) => {
-    const newTableInfo = tableInfo.map((table, index) => {
-      if (index === data.rowIndex) {
-        return { ...table, ...data.newRowData };
-      }
-      return table;
-    });
-    dispatch(loadData(newTableInfo));
-  };
-
-  const handleColumnEdit = () => {
-    setColumnEdit(true);
-  };
-
-  const handleCancelEdit = () => {
-    setColumnEdit(false);
-  };
-
-  // API
-
-  // POST API-Filter Milestone mode wise
-
-  const onModeChange = (e) => {
-    console.log(e, "this is mode");
-    setSelectedMode(e.value);
-    console.log('userStore', userStore)
-    const data = { project_id: userStore.project_name.project_id, mode: e.value.name, }
-    Api.post('/filter_milestone', data).then((res) => {
-      console.log(res, "this is response");
-      const response = res;
-      if (response.status == 200) {
-        setShowMessage(true);
-      }
-    })
-      .catch((error) => {
-        setError(error);
-      })
-
-  };
-  const submitpmo = (data) => {
-    console.log(data, "this is post submit");
-
-
-    // POST Api call for submit Inserting and updating milestone date
-
-    Api.post('/insert_update_milestone_date', data).then((res) => {
-      console.log(res, "this is response");
-      const response = res;
-      if (response.status == 200) {
-        // Handle Response
-        setShowMessage(true);
-      }
-    })
-      .catch((error) => {
-        setError(error);
-      })
-
-  };
-
-
-  // GET API for milestone date
-  const milestoneData = () => {
-    Api.get("/get_milestone_date")
-    .then((res) => {
-      console.log(res, "this is date")
-      setGetDate(res.data.data);
-    })
-    .catch((error) => {
-      setError(error);
-    });
-  }
-
-  useEffect(() => {
-    milestoneData();
-  }, []);
-
-  // GET API for Dev, Hor and Validation
-
-  useEffect(() => {
+  const getApiData = (data) => {
     let url = "";
 
     if (activeIndex === 1) {
@@ -233,17 +281,52 @@ const Dashboard = () => {
     if (activeIndex === 3) {
       url = "/get_hor";
     }
-    setGetTableData(tableInfo);
-    Api.get(url)
-      .then((res) => {
-        console.log(res, "this is horizontal data");
-        setGetTableData(res.data.data);
-      })
-      .catch((error) => {
-        setError(error);
-      });
-  }, [activeIndex]);
+    if(activeIndex !== 0 && activeIndex !==4){
+      // if(selectedMode !== ""){
+      //   {
+      //     Api.post(url, data)
+      //     .then((res) => {
+      //       console.log(res, "this is horizontal data");
+      //       setGetgetTableData(res.data.data);
+      //     })
+      //     .catch((error) => {
+      //       setError(error);
+      //     });
+      //   }
+      // }
 
+      // if(selectedMode === "")
+      {
+        Api.get(url)
+        .then((res) => {
+          console.log(res, "this is horizontal data");
+          setGetgetTableData(res.data.data);
+        })
+        .catch((error) => {
+          setError(error);
+        });
+      }
+     
+
+    }
+    if(activeIndex === 4){
+      Api.post("/get_budget", {project_id:userStore.project_name.project_id}).then((res) => {
+            console.log(res, "this is budget response");
+            const response = res;
+            if (response.status == 200) {
+              console.log(res.data.data, "this is budget data")
+              setbudgetData(res.data.data);
+              // Handle Response
+            }
+          });
+    }
+   
+   
+  };
+
+  useEffect(() => {
+    getApiData();
+  }, [activeIndex]);
 
   useEffect(() => {
     if (!userStore.hasOwnProperty("useremail")) {
@@ -251,6 +334,7 @@ const Dashboard = () => {
     }
     dispatch(loadData(Data));
   }, [userStore]);
+
   const leftToolbarTemplate = () => {
     return (
       <React.Fragment>
@@ -270,7 +354,7 @@ const Dashboard = () => {
           </div>
         ) : null}
 
-        {activeIndex !== 0 && activeIndex !== 4 ? (
+        {/* {activeIndex !== 0 && activeIndex !== 4 ? (
           <Button
             label="New"
             icon="pi pi-plus"
@@ -278,9 +362,28 @@ const Dashboard = () => {
             style={{ backgroundColor: "#405685" }}
             onClick={openNew}
           />
-        ) : null}
+        ) : null} */}
       </React.Fragment>
     );
+  };
+
+  //Export Excel
+  const handleExport = (e) => {
+    console.log(e);
+    if (e.value === "xls") {
+      axios({
+        url: 'http://10.49.3.7:5000/download', 
+        method: 'GET',
+        responseType: 'blob', // important
+    }).then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'file.xls'); //or any other extension
+        document.body.appendChild(link);
+        link.click();
+    });
+    }
   };
 
   const rightToolbarTemplate = () => {
@@ -298,7 +401,7 @@ const Dashboard = () => {
             value={selectedCity1}
             options={exports}
             // onClick={exportExcel}
-            // onChange={onCityChange}
+            onChange={handleExport}
             optionLabel="name"
             icon="pi pi-upload"
             placeholder="Export"
@@ -352,26 +455,23 @@ const Dashboard = () => {
             right={rightToolbarTemplate}
           ></Toolbar>
         ) : null}
-
-        <div className="edit_button">
-
-        </div>
+     
         <CustomComponent />
         {activeIndex !== 0 && activeIndex !== 4 ? (
           <TableInfo
             columns={columns}
             data={getTableData}
-            // handleTableData={handleTableData}
             colEdit={columnEdit}
             custHeader={true}
             customHeader={headerGroup}
+            handleTableData={submitpmo}
           />
         ) : null}
       </div>
       {activeIndex !== 4 ? (
         <Button
           label="Submit"
-          onClick={submitpmo}
+          onClick={()=>{return null}}
           aria-label="Submit"
           style={{
             display: "flex",
